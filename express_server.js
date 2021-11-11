@@ -20,12 +20,6 @@ const urlDatabase = {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-//URL Shortening (PART 1)
-//creating new route for user to GET request when visiting website/urls/new
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
-});
-
 //handle POST request using body-parser library to make it readable
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
@@ -40,6 +34,12 @@ app.post("/urls", (req, res) => {
 
 });
 
+//URL Shortening (PART 1)
+//creating new route for user to GET request when visiting website/urls/new
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+//URL Shortening (PART 2) redirecting from shortURL, longURL 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
