@@ -2,10 +2,10 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
-function generateRandomString(str) {
+function generateRandomString(numberChars) { //passing in numberChars=6
   let randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
-  for ( let i = 0; i < str.length; i++ ) {
+  for ( let i = 0; i < numberChars ; i++ ) {
       result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
   }
   return result;
@@ -29,9 +29,28 @@ app.get("/urls/new", (req, res) => {
 //handle POST request using body-parser library to make it readable
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  shortURL = generateRandomString(6);
+  const longurl = req.body.longURL;
+  const shortURL = generateRandomString(6);
   console.log("new string url: ", shortURL);
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  urlDatabase[shortURL] = longurl;
+  console.log(urlDatabase);
+  //res.send("Ok");
+  res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
+  //res.redirect(longurl); //redirecting longurl
+
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+  res.redirect(longURL);
+});
+
+app.get("/urls/:shortURL", (req, res) => {
+  console.log(req.params.shortURL);
+  console.log(urlDatabase[req.params.shortURL]);
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  res.render("urls_show", templateVars);
 });
 
 //route handler to handle get request and response, uses urls as key to access within the template
@@ -40,18 +59,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// app.get("/urls/:id", (req, res) => {
-//   console.log(req.params);
-//   const templateVars = { urls: urlDatabase };
-//   res.render("urls_index", templateVars);
-// });
 
-app.get("/urls/:shortURL", (req, res) => {
-  console.log(req.params.shortURL);
-  console.log(urlDatabase[req.params.shortURL]);
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
-  res.render("urls_show", templateVars);
-});
 
 
 app.listen(PORT, () => {
