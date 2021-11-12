@@ -34,6 +34,11 @@ app.post("/urls", (req, res) => {
 
 });
 
+app.post('/urls/:shortURL/delete', (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+})
+
 //URL Shortening (PART 1)
 //creating new route for user to GET request when visiting website/urls/new
 app.get("/urls/new", (req, res) => {
