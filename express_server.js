@@ -41,7 +41,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 //URL Updating
 app.post('/urls/:id', (req, res) =>{
-  edit urlDatabase[req.params.longURL];
+  //update urlDatabase[req.params.longURL];
   res.redirect('/urls');
 })
 
