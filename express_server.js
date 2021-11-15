@@ -1,5 +1,7 @@
 const express = require("express");
+var cookieParser = require('cookie-parser');
 const app = express();
+
 const PORT = 8080; // default port 8080
 
 function generateRandomString(numberChars) { //passing in numberChars=6
@@ -12,6 +14,7 @@ function generateRandomString(numberChars) { //passing in numberChars=6
 }
 
 app.set("view engine", "ejs");
+app.use(cookieParser());
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -45,6 +48,15 @@ app.post('/urls/:id/edit', (req, res) =>{
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect('/urls');
 })
+
+//Login route
+app.post('/login', (req, res) => {
+res.cookie(username) = req.body.username;
+res.redirect('/urls')
+console.log("user logged in", cookie.username);
+})
+
+
 
 //URL Shortening (PART 1)
 //creating new route for user to GET request when visiting website/urls/new
