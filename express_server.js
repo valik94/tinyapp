@@ -23,6 +23,19 @@ const urlDatabase = {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 //handle POST request using body-parser library to make it readable
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
@@ -54,24 +67,31 @@ app.post('/login', (req, res) => {
   const username = req.body.username;
   res.cookie('username', username);
   res.redirect ('/urls');
-  //res.send('Hello World');
-// let username='';
-//   res.cookie(username) = req.body.username;
-// res.redirect('/urls');
 }); 
-
-//Creating Registration Page
-app.get('/register', (req,res)=>{
-  return templateRegister;
-})
 
 //Logout route
 app.post('/logout', (req,res) =>{
   res.clearCookie("username");
   res.redirect('/urls');
-
 })
 
+//Creating Registration Page
+app.get('/register', (req,res)=>{
+  const templateVars = { urls: urlDatabase, username: null };
+  return res.render('url_register', templateVars);
+})
+
+app.post('/register', (req,res) =>{
+  const randomId= generateRandomString(5);
+  console.log(req.body.registeremail);
+  const emailUser = req.body.registeremail;
+  const passUser = req.body.password;
+  const newUser = { id:randomId, email:emailUser, password:passUser};
+  users[randomId] = newUser;
+  console.log(users);
+  res.cookie('user_id', randomId);
+  res.redirect('/urls');
+})
 
 //Get route to ADD cookie 
 app.get('/login', (req, res) =>{
