@@ -51,16 +51,32 @@ app.post('/urls/:id/edit', (req, res) =>{
 
 //Login route
 app.post('/login', (req, res) => {
-let username='';
-  res.cookie(username) = req.body.username;
-res.redirect('/urls')
+  const username = req.body.username;
+  res.cookie('username', username);
+  res.redirect ('/urls');
+  //res.send('Hello World');
+// let username='';
+//   res.cookie(username) = req.body.username;
+// res.redirect('/urls');
 }); 
 
+//Creating Registration Page
+app.get('/register', (req,res)=>{
+  return templateRegister;
+})
+
+
+//Get route to ADD cookie 
+app.get('/login', (req, res) =>{
+  res.cookie(`Cookie token name`,`encrypted cookie string Value`);
+  res.send(`Cookie have been saved successfully`);
+})
 
 //URL Shortening (PART 1)
 //creating new route for user to GET request when visiting website/urls/new
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username:user };
+  res.render("urls_new", templateVars);
 });
 //URL Shortening (PART 2) redirecting from shortURL, longURL 
 app.get("/u/:shortURL", (req, res) => {
@@ -70,16 +86,19 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const user = req.cookies.username;
   console.log(req.params.shortURL);
   console.log(urlDatabase[req.params.shortURL]);
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username:user };
   res.render("urls_show", templateVars);
 });
 
 //route handler to handle get request and response, uses urls as key to access within the template
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const user = req.cookies.username;
+  const templateVars = { urls: urlDatabase, username: user };
   res.render("urls_index", templateVars);
+  
 });
 
 
