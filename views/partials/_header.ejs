@@ -5,14 +5,23 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
+      <div class="navbar-nav w-25">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <form action='/login' method="POST" >
-          <input type="username" name="username"> 
-          <button type="submit" class="btn btn-primary">sign in</button>
-        </form>
       </div>
+      <div class="w-75 text-right"> 
+        <% if (username) {%>
+          <form action='/logout' method="POST" >
+            <span> Logged in as: Tiny App <%= username %>!</span> 
+            <button type="submit" class="btn border border-dark">Log out</button>
+          </form>
+         <% } else { %>
+          <form action='/login' method="POST" >
+            <input type="username" name="username" class="form-control-inline"> 
+            <button type="submit" class="btn border border-dark">Login</button>
+          </form>
+         <% } %>
+        </div>
     </div>
   </nav>
 </header>

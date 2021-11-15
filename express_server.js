@@ -65,6 +65,13 @@ app.get('/register', (req,res)=>{
   return templateRegister;
 })
 
+//Logout route
+app.post('/logout', (req,res) =>{
+  res.clearCookie("username");
+  res.redirect('/urls');
+
+})
+
 
 //Get route to ADD cookie 
 app.get('/login', (req, res) =>{
@@ -75,7 +82,8 @@ app.get('/login', (req, res) =>{
 //URL Shortening (PART 1)
 //creating new route for user to GET request when visiting website/urls/new
 app.get("/urls/new", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username:user };
+  const user = req.cookies.username;
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: user };
   res.render("urls_new", templateVars);
 });
 //URL Shortening (PART 2) redirecting from shortURL, longURL 
@@ -98,7 +106,6 @@ app.get("/urls", (req, res) => {
   const user = req.cookies.username;
   const templateVars = { urls: urlDatabase, username: user };
   res.render("urls_index", templateVars);
-  
 });
 
 
