@@ -51,11 +51,10 @@ app.post('/urls/:id/edit', (req, res) =>{
 
 //Login route
 app.post('/login', (req, res) => {
-res.cookie(username) = req.body.username;
+let username='';
+  res.cookie(username) = req.body.username;
 res.redirect('/urls')
-console.log("user logged in", cookie.username);
-})
-
+}); 
 
 
 //URL Shortening (PART 1)
