@@ -10,9 +10,9 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       <div class="w-75 text-right"> 
-        <% if (username) {%>
+        <% if (user) {%>
           <form action='/logout' method="POST" >
-            <span> Logged in as: Tiny App <%= username %>!</span> 
+            <span> Logged in as: Tiny App <%= user.email %>!</span> 
             <button type="submit" class="btn border border-dark">Log out</button>
           </form>
          <% } else { %>
@@ -20,6 +20,7 @@
             <input type="username" name="username" class="form-control-inline"> 
             <button type="submit" class="btn border border-dark">Login</button>
           </form>
+          <a class="btn btn-primary" href="/register">Register</a>
          <% } %>
         </div>
     </div>

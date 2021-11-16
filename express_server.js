@@ -36,6 +36,15 @@ const users = {
   }
 }
 
+const checkUser = function (users, emailUser){
+  for (let email in users){
+    if (users[email].email === emailUser) {
+      return true;
+    }
+  }
+  return false;
+}
+
 //handle POST request using body-parser library to make it readable
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
@@ -70,23 +79,34 @@ app.post('/login', (req, res) => {
 }); 
 
 //Logout route
-app.post('/logout', (req,res) =>{
-  res.clearCookie("username");
+app.post('/logout', (req, res) =>{
+  res.clearCookie("user_id");
   res.redirect('/urls');
 })
 
 //Creating Registration Page
 app.get('/register', (req,res)=>{
-  const templateVars = { urls: urlDatabase, username: null };
+  const templateVars = { urls: urlDatabase, user: null };
   return res.render('url_register', templateVars);
 })
 
+//Register POST
 app.post('/register', (req,res) =>{
   const randomId= generateRandomString(5);
   console.log(req.body.registeremail);
   const emailUser = req.body.registeremail;
   const passUser = req.body.password;
   const newUser = { id:randomId, email:emailUser, password:passUser};
+  if (emailUser === '' || passUser === ''){
+      res.status(400)
+      return res.send("User's password and/or email is missing");
+  }
+
+if (checkUser(users, emailUser)){
+  res.status(400)
+  return res.send("the email already exists.");
+}
+
   users[randomId] = newUser;
   console.log(users);
   res.cookie('user_id', randomId);
@@ -102,8 +122,9 @@ app.get('/login', (req, res) =>{
 //URL Shortening (PART 1)
 //creating new route for user to GET request when visiting website/urls/new
 app.get("/urls/new", (req, res) => {
-  const user = req.cookies.username;
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: user };
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: user  };
   res.render("urls_new", templateVars);
 });
 //URL Shortening (PART 2) redirecting from shortURL, longURL 
@@ -112,20 +133,26 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
 });
-
+//shorturL GET
 app.get("/urls/:shortURL", (req, res) => {
-  const user = req.cookies.username;
+  const idofUser = req.cookies.user_id;
+  const userObject = users[idofUser];
   console.log(req.params.shortURL);
   console.log(urlDatabase[req.params.shortURL]);
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username:user };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: userObject };
   res.render("urls_show", templateVars);
 });
 
 //route handler to handle get request and response, uses urls as key to access within the template
 app.get("/urls", (req, res) => {
-  const user = req.cookies.username;
-  const templateVars = { urls: urlDatabase, username: user };
-  res.render("urls_index", templateVars);
+  const userId =req.cookies.user_id
+  if (userId){
+    const user = users[userId];
+    const templateVars = { urls: urlDatabase, user: user };
+    return res.render("urls_index", templateVars);
+  }
+  res.redirect('/login');
+
 });
 
 
