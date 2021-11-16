@@ -36,10 +36,29 @@ const users = {
   }
 }
 
-const checkUser = function (users, emailUser){
-  for (let email in users){
-    if (users[email].email === emailUser) {
-      return true;
+const checkUser = function (users, emailUser, emailPassword){
+  for (let user in users){
+    if ((users[user].email === emailUser) && (users[user].password === emailPassword)) {
+      return true; //user already exists
+    }
+  }
+  return false; //user doesnt exist in users object
+}
+
+const getUserID = function (users, emailUser){
+  for (let user in users){
+    //console.log(email);
+    if (users[user].email=== emailUser){
+      console.log(users[user].id)
+      return users[user].id;
+    }
+  }
+}
+
+const registerUser = function(users, emailUser){
+  for (let user in users){
+    if (users[user].email === emailUser){
+      return true;   
     }
   }
   return false;
@@ -79,9 +98,14 @@ app.post('/logout', (req, res) =>{
 
 //Login route
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
-  res.redirect ('/urls');
+  const email = req.body.loginemail;
+  const password = req.body.password;
+  if (checkUser(users, email, password)){
+    let userid = getUserID(users, email)
+    res.cookie('user_id', userid);
+    res.redirect ('/urls');
+  }
+  res.status(403).send("email or password is incorrect")
 }); 
 
 //Login NEW get
@@ -109,11 +133,10 @@ app.post('/register', (req,res) =>{
       return res.send("User's password and/or email is missing");
   }
 
-if (checkUser(users, emailUser)){
+if (registerUser(users, emailUser)){
   res.status(400)
   return res.send("the email already exists.");
 }
-
   users[randomId] = newUser;
   console.log(users);
   res.cookie('user_id', randomId);
