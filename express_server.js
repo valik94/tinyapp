@@ -71,6 +71,12 @@ app.post('/urls/:id/edit', (req, res) =>{
   res.redirect('/urls');
 })
 
+//Logout route
+app.post('/logout', (req, res) =>{
+  res.clearCookie("user_id");
+  res.redirect('/urls');
+})
+
 //Login route
 app.post('/login', (req, res) => {
   const username = req.body.username;
@@ -78,16 +84,17 @@ app.post('/login', (req, res) => {
   res.redirect ('/urls');
 }); 
 
-//Logout route
-app.post('/logout', (req, res) =>{
-  res.clearCookie("user_id");
-  res.redirect('/urls');
+//Login NEW get
+app.get('/login', (req,res) =>{
+  const templateVars = { user:null}
+res.render('login', templateVars);
 })
+
 
 //Creating Registration Page
 app.get('/register', (req,res)=>{
   const templateVars = { urls: urlDatabase, user: null };
-  return res.render('url_register', templateVars);
+  return res.render('urls_register', templateVars);
 })
 
 //Register POST
