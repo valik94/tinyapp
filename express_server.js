@@ -69,14 +69,35 @@ const registerUser = function(users, emailUser){
   }
   return false;
 }
+//logged in user urls
+const urlsUser = function (userid, urlDatabase){
+  const newObjectDatabase={};
+  for (let obj in urlDatabase){
+    console.log(obj);
+    if (urlDatabase[obj].userID === userid){
+      newObjectDatabase[obj] = urlDatabase[obj];
+    }
+  }
+  return newObjectDatabase;
+}
+
+const userOwner = function (userid, shortURL){
+  if (urlDatabase[shortURL].userID === userid){
+    return true;
+  }
+  else {
+    return false;
+  }
+}
 
 //handle POST request using body-parser library to make it readable
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  const longurl = req.body.longURL;
+  const longURL = req.body.longURL;
   const shortURL = generateRandomString(6);
+  const userID = req.cookies['user_id'];
   console.log("new string url: ", shortURL);
-  urlDatabase[shortURL].longURL = longurl;
+  urlDatabase[shortURL] = { longURL, userID };
   console.log(urlDatabase);
   //res.send("Ok");
   res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
@@ -84,15 +105,31 @@ app.post("/urls", (req, res) => {
 });
 //URL Deleting
 app.post('/urls/:shortURL/delete', (req, res) => {
+  const userid = req.cookies['user_id'];
+  const shortURL = req.params.shortURL;
+  const alloweduser = userOwner(userid, shortURL);
+  if (alloweduser){
   delete urlDatabase[req.params.shortURL].longURL;
   res.redirect('/urls');
+  }
+  else{
+    res.send("You are not allowed to access this page.");
+  }
 })
 
 //URL Updating
 app.post('/urls/:id/edit', (req, res) =>{
+  const userid = req.cookies['user_id'];
+  const shortURL = req.params.id;
+  const alloweduser = userOwner(userid, shortURL);
+  if (alloweduser){
   console.log(`line45`, req.params.id);
   urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect('/urls');
+  }
+  else{
+    res.send("You are not allowed to access this page.");
+  }
 })
 
 //Logout route
@@ -178,7 +215,7 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const urlDatabaseObject = urlDatabase[shortURL];
   if (urlDatabaseObject){
-    const longURL =urlDatabaseObject.longURL;
+    const longURL = urlDatabaseObject.longURL;
     res.redirect(longURL); 
   }
   else{
@@ -188,19 +225,25 @@ app.get("/u/:shortURL", (req, res) => {
 //shorturL GET
 app.get("/urls/:shortURL", (req, res) => {
   const idofUser = req.cookies.user_id;
+  const shortURL = req.params.shortURL;
+  const alloweduser = userOwner(idofUser, shortURL);
+  if (alloweduser) {
   const userObject = users[idofUser];
-  console.log(req.params.shortURL);
-  console.log(urlDatabase[req.params.shortURL].longURL);
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: userObject };
   res.render("urls_show", templateVars);
+  }
+  else{
+    res.send("You are not allowed to access this page."); 
+  }
 });
 
 //route handler to handle get request and response, uses urls as key to access within the template
 app.get("/urls", (req, res) => {
   const userId = req.cookies.user_id;
   if (userId){
+    const urlUserObject = urlsUser(userId, urlDatabase);
     const user = users[userId];
-    const templateVars = { urls: urlDatabase, user: user };
+    const templateVars = { urls: urlUserObject, user: user  };
     return res.render("urls_index", templateVars);
   }
   else{
