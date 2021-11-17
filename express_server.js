@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const app = express();
-const {getUserByEmail} = require('./helpers');
+const {getUserByEmail, checkUser, getUserID, registerUser, urlsUser, userOwner} = require('./helpers');
 const PORT = 8080; // default port 8080
 
 function generateRandomString(numberChars) { //passing in numberChars=6
@@ -48,54 +48,6 @@ const users = {
   }
 }
 
-const checkUser = function (users, emailUser, emailPassword){
-  for (let user in users){
-    if ((users[user].email === emailUser) && (users[user].password === emailPassword)) {
-      return true; //user already exists
-    }
-  }
-  return false; //user doesnt exist in users object
-}
-
-const getUserID = function (users, emailUser){
-  for (let user in users){
-    //console.log(email);
-    if (users[user].email=== emailUser){
-      //console.log(users[user].id)
-      return users[user].id;
-    }
-  }
-}
-
-const registerUser = function(users, emailUser){
-  for (let user in users){
-    if (users[user].email === emailUser){
-      return true;   
-    }
-  }
-  return false;
-}
-//logged in user urls
-const urlsUser = function (userid, urlDatabase){
-  const newObjectDatabase={};
-  for (let obj in urlDatabase){
-    console.log(obj);
-    if (urlDatabase[obj].userID === userid){
-      newObjectDatabase[obj] = urlDatabase[obj];
-    }
-  }
-  return newObjectDatabase;
-}
-
-const userOwner = function (userid, shortURL){
-  if (urlDatabase[shortURL].userID === userid){
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
 //handle POST request using body-parser library to make it readable
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
@@ -113,7 +65,7 @@ app.post("/urls", (req, res) => {
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userid = req.session['userID'];
   const shortURL = req.params.shortURL;
-  const alloweduser = userOwner(userid, shortURL);
+  const alloweduser = userOwner(userid, shortURL, urlDatabase);
   if (alloweduser){
   delete urlDatabase[req.params.shortURL].longURL;
   res.redirect('/urls');
@@ -127,7 +79,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/urls/:id/edit', (req, res) =>{
   const userid = req.session['userID'];
   const shortURL = req.params.id;
-  const alloweduser = userOwner(userid, shortURL);
+  const alloweduser = userOwner(userid, shortURL, urlDatabase);
   if (alloweduser){
   console.log(`line45`, req.params.id);
   urlDatabase[req.params.id].longURL = req.body.longURL;
@@ -208,18 +160,13 @@ if (registerUser(users, emailUser)){
   res.redirect('/urls');
 })
 
-// //Get route to ADD cookie 
-// app.get('/login', (req, res) =>{
-//   res.cookie(`Cookie token name`,`encrypted cookie string Value`);
-//   res.send(`Cookie have been saved successfully`);
-// })
 
 //URL Shortening (PART 1)
 //creating new route for user to GET request when visiting website/urls/new
 app.get("/urls/new", (req, res) => {
   const userId = req.session.userID;
   const user = users[userId];
-  const templateVars = { user: user  };
+  const templateVars = { user: user };
   if (req.session['userID']){
     res.render("urls_new", templateVars);
   }
@@ -243,7 +190,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const idofUser = req.session.userID;
   const shortURL = req.params.shortURL;
-  const alloweduser = userOwner(idofUser, shortURL);
+  const alloweduser = userOwner(idofUser, shortURL, urlDatabase);
   if (alloweduser) {
   const userObject = users[idofUser];
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: userObject };
