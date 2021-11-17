@@ -61,13 +61,13 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
 
 });
-//URL Deleting
+//shortURL Deleting
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userid = req.session['userID'];
   const shortURL = req.params.shortURL;
   const alloweduser = userOwner(userid, shortURL, urlDatabase);
   if (alloweduser){
-  delete urlDatabase[req.params.shortURL].longURL;
+  delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
   }
   else{
@@ -75,13 +75,12 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   }
 })
 
-//URL Updating
+//URL Updating/Editing
 app.post('/urls/:id/edit', (req, res) =>{
   const userid = req.session['userID'];
   const shortURL = req.params.id;
   const alloweduser = userOwner(userid, shortURL, urlDatabase);
   if (alloweduser){
-  console.log(`line45`, req.params.id);
   urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect('/urls');
   }
@@ -92,7 +91,6 @@ app.post('/urls/:id/edit', (req, res) =>{
 
 //Logout route
 app.post('/logout', (req, res) =>{
-  // res.clearCookie("user_id");
   req.session = null;
   res.redirect('/urls');
 })
@@ -114,7 +112,6 @@ app.post('/login', (req, res) => {
     res.status(403).send("email or password is incorrect");
     return;
   }
-    //res.cookie('user_id', userFound.id);
     req.session.userID = userFound.id;
     res.redirect ('/urls'); 
 }); 
@@ -155,7 +152,6 @@ if (registerUser(users, emailUser)){
 }
   users[randomId] = newUser;
   console.log(users);
-  // res.cookie('user_id', randomId);
   req.session.userId = randomId;
   res.redirect('/urls');
 })
@@ -186,7 +182,7 @@ app.get("/u/:shortURL", (req, res) => {
     res.send("The id does not exist");
   }
 });
-//shorturL GET
+//shortURL GET route
 app.get("/urls/:shortURL", (req, res) => {
   const idofUser = req.session.userID;
   const shortURL = req.params.shortURL;

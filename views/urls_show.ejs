@@ -14,15 +14,12 @@
       <div class="card-body">
         <h5> <%= user.user_Id %> </h5>
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <p class="card-text">Short URL: <a href="<%= shortURL %>"><%= shortURL %></a></p>
+        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
         <form method="POST" action="/urls/<%=shortURL%>/edit"> 
           <input type="text" value = '<%= longURL %>' name = "longURL">
           <input type="submit" value = 'edit' class = 'btn btn-success'>
          </form>
-         <form method = "POST" action = "/register">
-          <input type = "email" name = "email">
-          <input type = "password" name= "password">
-        </form>
+
 
          
       </div>
