@@ -3,17 +3,10 @@ const bcrypt = require('bcryptjs');
 const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const app = express();
-const {getUserByEmail, checkUser, getUserID, registerUser, urlsUser, userOwner} = require('./helpers');
+const {getUserByEmail, registerUser, urlsUser, userOwner, generateRandomString} = require('./helpers');
 const PORT = 8080; // default port 8080
 
-function generateRandomString(numberChars) { //passing in numberChars=6
-  let randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for ( let i = 0; i < numberChars ; i++ ) {
-      result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-  }
-  return result;
-}
+
 
 app.set("view engine", "ejs");
 app.use(cookieParser());
@@ -48,18 +41,23 @@ const users = {
   }
 }
 
+//Home Page redirect
+app.get('/', (req,res) => {
+  res.redirect('/urls');
+})
+
 //handle POST request using body-parser library to make it readable
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  const longURL = req.body.longURL;
-  const shortURL = generateRandomString(6);
   const userID = req.session['userID'];
-  console.log("new string url: ", shortURL);
-  urlDatabase[shortURL] = { longURL, userID };
-  console.log(urlDatabase);
-  //res.send("Ok");
-  res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
-
+  if(userID){
+    const longURL = req.body.longURL;
+    const shortURL = generateRandomString(6);
+    
+    urlDatabase[shortURL] = { longURL, userID };
+    //res.send("Ok");
+    return res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
+  }
+  res.redirect(`/login`);
 });
 //shortURL Deleting
 app.post('/urls/:shortURL/delete', (req, res) => {
@@ -104,10 +102,8 @@ app.post('/login', (req, res) => {
   if (!userFound){
     res.status(403).send("User email does not exist.")
   }
-  console.log(userFound);
 
   const hashCompare = bcrypt.compareSync(password, userFound.password); // returns true
-  console.log(`comparing the hashes:`, hashCompare);
   if (!hashCompare){
     res.status(403).send("email or password is incorrect");
     return;
@@ -129,14 +125,17 @@ app.get('/login', (req,res) =>{
 
 //Creating Registration Page
 app.get('/register', (req,res)=>{
+  const userId = req.session.userID;
+  if (!userId){
   const templateVars = { user: null };
   return res.render('urls_register', templateVars);
+  }
+  res.redirect('/urls');
 })
 
 //Register POST
 app.post('/register', (req,res) =>{
   const randomId= generateRandomString(5);
-  console.log(req.body.registeremail);
   const emailUser = req.body.registeremail;
   const passUser = req.body.password;
   const hashedPassword = bcrypt.hashSync(passUser, 10);
@@ -151,7 +150,6 @@ if (registerUser(users, emailUser)){
   return res.send("the email already exists.");
 }
   users[randomId] = newUser;
-  console.log(users);
   req.session.userId = randomId;
   res.redirect('/urls');
 })
@@ -200,7 +198,6 @@ app.get("/urls/:shortURL", (req, res) => {
 //route handler to handle get request and response, uses urls as key to access within the template
 app.get("/urls", (req, res) => {
   const userId = req.session.userID;
-  console.log(`user id is: `,userId);
   if (userId){
     const urlUserObject = urlsUser(userId, urlDatabase);
     const user = users[userId];

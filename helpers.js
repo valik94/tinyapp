@@ -57,4 +57,13 @@ const userOwner = function (userid, shortURL, urlDatabase){
   }
 }
 
-module.exports = {getUserByEmail,checkUser, getUserID, registerUser, urlsUser, userOwner};
+function generateRandomString(numberChars) { //passing in numberChars=6
+  let randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for ( let i = 0; i < numberChars ; i++ ) {
+      result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+  }
+  return result;
+}
+
+module.exports = {getUserByEmail,checkUser, getUserID, registerUser, urlsUser, userOwner, generateRandomString};
